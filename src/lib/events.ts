@@ -9,6 +9,7 @@ export function defaultLastFromFirst(firstIso: string): EventDate {
 
 function parseFrequency(raw: unknown): Frequency {
   const map: Record<string, Frequency> = {
+    once: "once",
     daily: "daily",
     weekly: "weekly",
     biweekly: "biweekly",
@@ -16,7 +17,6 @@ function parseFrequency(raw: unknown): Frequency {
     quarterly: "quarterly",
     semiannual: "semiannual",
     yearly: "yearly",
-    once: "monthly",
   };
   if (typeof raw === "string" && raw in map) return map[raw];
   return "monthly";

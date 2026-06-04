@@ -32,6 +32,7 @@ function newId() {
 }
 
 const freqOptions: { value: Frequency; label: string }[] = [
+  { value: "once", label: "不重复" },
   { value: "daily", label: "每日" },
   { value: "weekly", label: "每周" },
   { value: "biweekly", label: "每半月" },
@@ -171,9 +172,12 @@ export function EventConfig({
     const firstDate = form.firstDate;
     const createdDate = form.createdDate;
 
-    const lastDate: EventDate | null = form.isLongTerm
-      ? null
-      : clampLastToFirst(firstDate, form.lastDate);
+    const isOnce = form.frequency === "once";
+    const lastDate: EventDate | null = isOnce
+      ? firstDate
+      : form.isLongTerm
+        ? null
+        : clampLastToFirst(firstDate, form.lastDate);
 
     if (form.category === "loan" && amountYuan <= 0) {
       window.alert("请填写贷款本金。");
@@ -186,7 +190,7 @@ export function EventConfig({
       amount: amountYuan,
       createdDate,
       firstDate,
-      isLongTerm: form.isLongTerm,
+      isLongTerm: isOnce ? false : form.isLongTerm,
       lastDate,
       frequency: form.frequency,
     };
@@ -241,9 +245,12 @@ export function EventConfig({
     setForm((f) => ({
       ...f,
       firstDate,
-      lastDate: f.isLongTerm
-        ? f.lastDate
-        : clampLastToFirst(firstDate, f.lastDate),
+      lastDate:
+        f.frequency === "once"
+          ? firstDate
+          : f.isLongTerm
+            ? f.lastDate
+            : clampLastToFirst(firstDate, f.lastDate),
     }));
   };
 
@@ -259,6 +266,7 @@ export function EventConfig({
     form.category === "transfer" ||
     form.category === "loan";
   const isLoan = form.category === "loan";
+  const isOnce = !isLoan && form.frequency === "once";
   const amountLabel = isLoan ? "贷款本金" : "金额";
 
   const previewLoanPeriods = useMemo(() => {
@@ -338,21 +346,23 @@ export function EventConfig({
                 lastDate: clampLastToFirst(f.firstDate, lastDate),
               }))
             }
-            disabled={form.isLongTerm}
+            disabled={form.isLongTerm || isOnce}
           />
-          <div className="mt-2 flex justify-end">
-            <label className="flex shrink-0 items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.isLongTerm}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, isLongTerm: e.target.checked }))
-                }
-                className="h-4 w-4 rounded border-[var(--color-border)] accent-[var(--color-accent)]"
-              />
-              <span className="text-sm text-slate-300">长期</span>
-            </label>
-          </div>
+          {!isOnce && (
+            <div className="mt-2 flex justify-end">
+              <label className="flex shrink-0 cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={form.isLongTerm}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, isLongTerm: e.target.checked }))
+                  }
+                  className="h-4 w-4 rounded border-[var(--color-border)] accent-[var(--color-accent)]"
+                />
+                <span className="text-sm text-slate-300">长期</span>
+              </label>
+            </div>
+          )}
         </div>
       </div>
 
@@ -372,9 +382,16 @@ export function EventConfig({
           <Label>{isLoan ? "还款周期" : "发生频率"}</Label>
           <Select
             value={form.frequency}
-            onChange={(v) =>
-              setForm((f) => ({ ...f, frequency: v as Frequency }))
-            }
+            onChange={(v) => {
+              const frequency = v as Frequency;
+              setForm((f) => ({
+                ...f,
+                frequency,
+                ...(frequency === "once"
+                  ? { isLongTerm: false, lastDate: f.firstDate }
+                  : {}),
+              }));
+            }}
             options={isLoan ? loanRepaymentCycleOptions : freqOptions}
           />
           {isLoan && (

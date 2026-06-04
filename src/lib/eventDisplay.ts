@@ -2,6 +2,7 @@ import { formatEventDateLabel } from "./eventDates";
 import type { EventCategory, ExpenseSource, FinancialEvent, Frequency } from "../types";
 
 export const frequencyLabels: Record<Frequency, string> = {
+  once: "不重复",
   daily: "每日",
   weekly: "每周",
   biweekly: "每半月",

@@ -46,6 +46,8 @@ export function matchesFrequency(
   const target = parseIsoDate(targetIso);
 
   switch (frequency) {
+    case "once":
+      return targetIso === anchorIso;
     case "daily":
       return true;
     case "weekly":
@@ -95,6 +97,10 @@ export function countOccurrencesBetween(
   frequency: Frequency,
   isLongTerm: boolean
 ): number {
+  if (frequency === "once") {
+    if (compareIsoDate(lastIso ?? firstIso, firstIso) < 0) return 0;
+    return 1;
+  }
   if (isLongTerm || !lastIso) return 0;
   if (compareIsoDate(lastIso, firstIso) < 0) return 1;
 

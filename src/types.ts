@@ -1,4 +1,5 @@
 export type Frequency =
+  | "once"
   | "daily"
   | "weekly"
   | "biweekly"
