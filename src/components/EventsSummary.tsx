@@ -18,10 +18,13 @@ interface Props {
   className?: string;
 }
 
+const PREVIEW_LIMIT = 4;
+
 export function EventsSummary({ events, onEdit, onAdd, className }: Props) {
   const { formatMoney } = useSettings();
   const [listOpen, setListOpen] = useState(false);
   const upcoming = useMemo(() => upcomingEventsWithDate(events), [events]);
+  const preview = useMemo(() => upcoming.slice(0, PREVIEW_LIMIT), [upcoming]);
 
   return (
     <>
@@ -68,7 +71,7 @@ export function EventsSummary({ events, onEdit, onAdd, className }: Props) {
           </p>
         ) : (
           <ul className="scrollbar-fire -mx-0.5 max-h-[min(240px,32vh)] overflow-y-auto overflow-x-hidden rounded-xl border border-[var(--color-border)] divide-y divide-[var(--color-border)] pr-0.5 lg:max-h-none lg:min-h-0 lg:flex-1">
-            {upcoming.map(({ ev, nextIso }) => (
+            {preview.map(({ ev, nextIso }) => (
               <EventListRow
                 key={ev.id}
                 ev={ev}
