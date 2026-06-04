@@ -156,8 +156,8 @@ export function runSimulation(
   const start = new Date();
   start.setDate(1);
   const totalMonths = params.projectionYears * 12;
-  const step = params.projectionGranularity === "quarterly" ? 3 : 1;
-  const periodCount = Math.ceil(totalMonths / step);
+  const snapshotStep =
+    params.projectionGranularity === "quarterly" ? 3 : 1;
 
   const loans = events.filter((e): e is LoanEvent => e.category === "loan");
   const cashEvents = events.filter(
@@ -199,8 +199,8 @@ export function runSimulation(
 
   const loanInceptionLogged = new Set<string>();
 
-  for (let i = 0; i <= periodCount; i++) {
-    const simMonth = addMonths(start, i * step);
+  for (let monthOffset = 0; monthOffset <= totalMonths; monthOffset++) {
+    const simMonth = addMonths(start, monthOffset);
     const pending: PendingAction[] = [];
 
     for (const loan of loans) {
@@ -279,7 +279,11 @@ export function runSimulation(
       pending.push({
         date: pay.date,
         run: () => {
-          liquid -= pay.payment;
+          if (loan.expenseSource === "investment") {
+            investment -= pay.payment;
+          } else {
+            liquid -= pay.payment;
+          }
           return {
             label: `${loan.name} · 还款`,
             amount: pay.payment,
@@ -299,8 +303,7 @@ export function runSimulation(
     const nextMonthExpense = estimateNextMonthExpense(
       simMonth,
       cashEvents,
-      loans,
-      step
+      loans
     );
 
     if (
@@ -319,15 +322,17 @@ export function runSimulation(
       });
     }
 
-    const liabilities = remainingLoanBalance(loans, simMonth);
-    snapshots.push({
-      label: formatLabel(simMonth, params.projectionGranularity),
-      date: toIsoDate(simMonth.getFullYear(), simMonth.getMonth() + 1, 1),
-      investmentAssets: investment,
-      totalLiabilities: liabilities,
-      netWorth: investment + liquid - liabilities,
-      liquid,
-    });
+    if (monthOffset % snapshotStep === 0) {
+      const liabilities = remainingLoanBalance(loans, simMonth);
+      snapshots.push({
+        label: formatLabel(simMonth, params.projectionGranularity),
+        date: toIsoDate(simMonth.getFullYear(), simMonth.getMonth() + 1, 1),
+        investmentAssets: investment,
+        totalLiabilities: liabilities,
+        netWorth: investment + liquid - liabilities,
+        liquid,
+      });
+    }
   }
 
   const current = snapshots[0];
@@ -344,10 +349,9 @@ export function runSimulation(
 function estimateNextMonthExpense(
   simMonth: Date,
   cashEvents: CashflowEvent[],
-  loans: LoanEvent[],
-  step: number
+  loans: LoanEvent[]
 ): number {
-  const next = addMonths(simMonth, step);
+  const next = addMonths(simMonth, 1);
   let expense = 0;
   for (const ev of cashEvents) {
     if (ev.category !== "expense") continue;
@@ -365,6 +369,7 @@ function estimateNextMonthExpense(
   }
   for (const loan of loans) {
     if (loan.excludeFromExpense) continue;
+    if (loan.expenseSource === "investment") continue;
     const pay = loanPaymentForMonth(loan, next);
     if (pay) expense += pay.payment;
   }

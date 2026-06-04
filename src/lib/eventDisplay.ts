@@ -7,6 +7,7 @@ export const frequencyLabels: Record<Frequency, string> = {
   biweekly: "每半月",
   monthly: "每月",
   quarterly: "每季度",
+  semiannual: "每半年",
   yearly: "每年",
 };
 
@@ -57,7 +58,8 @@ export function eventSummaryLine(ev: FinancialEvent, formatMoney: (n: number) =>
     parts.push(
       `还款${frequencyLabels[ev.frequency]}`,
       `创建 ${formatEventDateLabel(ev.createdDate)}`,
-      `${ev.periods} 期`
+      `${ev.periods} 期`,
+      accountLabels[ev.expenseSource]
     );
   }
   if (ev.category === "expense") {

@@ -9,6 +9,7 @@ interface Props {
   periodLabel?: string;
   hideAmounts: boolean;
   onToggleHide: () => void;
+  className?: string;
 }
 
 export function DashboardPanel({
@@ -18,6 +19,7 @@ export function DashboardPanel({
   periodLabel,
   hideAmounts,
   onToggleHide,
+  className,
 }: Props) {
   return (
     <Section
@@ -28,6 +30,7 @@ export function DashboardPanel({
       action={
         <HideAmountsToggle hidden={hideAmounts} onToggle={onToggleHide} />
       }
+      className={className}
     >
       <MetricCards
         liquid={liquid}

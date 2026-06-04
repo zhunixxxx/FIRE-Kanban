@@ -70,12 +70,13 @@ export default function App() {
               <ParameterConfig
                 params={state.params}
                 onChange={updateParams}
-                className="lg:flex lg:min-h-0 lg:flex-1 lg:flex-col"
+                className="shrink-0"
               />
               <EventsSummary
                 events={state.events}
                 onEdit={(id) => openEventEditor(id)}
                 onAdd={() => openEventEditor(null)}
+                className="lg:min-h-0 lg:flex-1"
               />
             </aside>
 
@@ -91,17 +92,22 @@ export default function App() {
                 periodLabel={activeSnapshot?.label}
                 hideAmounts={hideAmounts}
                 onToggleHide={() => setHideAmounts((h) => !h)}
+                className="shrink-0"
               />
               <TrendChart
                 snapshots={simulation.snapshots}
                 selectedIndex={snapshotIndex}
                 onSelectSnapshot={setSnapshotIndex}
+                className="lg:min-h-0 lg:flex-1"
               />
             </div>
           </div>
 
           <div className="mt-6">
-            <TimelinePipeline entries={simulation.timeline} />
+            <TimelinePipeline
+              entries={simulation.timeline}
+              granularity={state.params.projectionGranularity}
+            />
           </div>
         </main>
 

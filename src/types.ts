@@ -4,6 +4,7 @@ export type Frequency =
   | "biweekly"
   | "monthly"
   | "quarterly"
+  | "semiannual"
   | "yearly";
 
 export type LoanMethod = "equal_principal" | "equal_installment";
@@ -63,6 +64,7 @@ export interface LoanEvent extends BaseEvent {
   annualRate: number;
   method: LoanMethod;
   excludeFromExpense: boolean;
+  expenseSource: ExpenseSource;
 }
 
 export type CashflowEvent = IncomeEvent | ExpenseEvent | TransferEvent;

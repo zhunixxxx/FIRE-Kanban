@@ -15,27 +15,53 @@ export function Section({
   action,
   children,
   className = "",
+  compact = false,
+  fill = false,
 }: {
   title: string;
   subtitle?: string;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
+  compact?: boolean;
+  fill?: boolean;
 }) {
   return (
     <section
-      className={`rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] p-5 md:p-6 shadow-lg shadow-black/20 ${className}`}
+      className={`rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-lg shadow-black/20 ${
+        compact ? "p-4" : "p-5 md:p-6"
+      } ${fill ? "flex min-h-0 flex-col" : ""} ${className}`}
     >
-      <header className="mb-5 flex items-start justify-between gap-4">
+      <header
+        className={`flex items-start justify-between gap-4 ${compact ? "mb-3" : "mb-5"} ${
+          fill ? "shrink-0" : ""
+        }`}
+      >
         <div className="min-w-0">
-          <h2 className="text-lg font-semibold tracking-tight text-white">{title}</h2>
+          <h2
+            className={`font-semibold tracking-tight text-white ${
+              compact ? "text-base" : "text-lg"
+            }`}
+          >
+            {title}
+          </h2>
           {subtitle && (
-            <p className="mt-1 text-sm text-[var(--color-muted)]">{subtitle}</p>
+            <p
+              className={`mt-0.5 text-[var(--color-muted)] ${
+                compact ? "text-xs" : "text-sm"
+              }`}
+            >
+              {subtitle}
+            </p>
           )}
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </header>
-      {children}
+      {fill ? (
+        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+      ) : (
+        children
+      )}
     </section>
   );
 }
@@ -107,11 +133,13 @@ export function Select({
   value,
   onChange,
   options,
+  compact = false,
 }: {
   id?: string;
   value: string;
   onChange: (v: string) => void;
   options: { value: string; label: string }[];
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
@@ -208,7 +236,7 @@ export function Select({
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className={selectTriggerClass}
+        className={`${selectTriggerClass} ${compact ? "py-2" : ""}`}
       >
         <span className="whitespace-nowrap">{selected?.label ?? value}</span>
         <svg
@@ -352,16 +380,19 @@ export function Modal({
   subtitle,
   children,
   size = "default",
+  scrollBody = true,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   subtitle?: string;
   children: ReactNode;
-  size?: "default" | "settings" | "event";
+  size?: "default" | "settings" | "event" | "events-list";
+  scrollBody?: boolean;
 }) {
   const isSettings = size === "settings";
   const isEvent = size === "event";
+  const isEventsList = size === "events-list";
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -391,12 +422,16 @@ export function Modal({
         onClick={onClose}
       />
       <div
-        className={`relative z-10 flex w-full flex-col rounded-t-2xl sm:rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-2xl shadow-black/50 max-h-[92vh] ${
-          isSettings
-            ? "sm:w-[600px] sm:max-w-[600px]"
-            : isEvent
-              ? "sm:w-[min(880px,96vw)] sm:max-w-[880px] sm:max-h-[88vh]"
-              : "sm:max-w-3xl sm:max-h-[88vh]"
+        className={`relative z-10 flex w-full min-h-0 flex-col rounded-t-2xl sm:rounded-2xl border border-[var(--color-border)] bg-[var(--color-panel)] shadow-2xl shadow-black/50 ${
+          isEventsList
+            ? "h-[min(560px,92vh)] w-full max-w-[640px]"
+            : `max-h-[92vh] ${
+                isSettings
+                  ? "sm:w-[600px] sm:max-w-[600px]"
+                  : isEvent
+                    ? "sm:w-[min(880px,96vw)] sm:max-w-[880px] sm:max-h-[88vh]"
+                    : "sm:max-w-3xl sm:max-h-[88vh]"
+              }`
         }`}
       >
         <header className="flex shrink-0 items-start justify-between gap-4 border-b border-[var(--color-border)] px-5 py-4 md:px-6">
@@ -428,7 +463,9 @@ export function Modal({
           className={
             isSettings
               ? "overflow-hidden"
-              : "scrollbar-fire overflow-y-auto px-5 py-5 md:px-6 md:py-6"
+              : scrollBody
+                ? "scrollbar-fire overflow-y-auto px-5 py-5 md:px-6 md:py-6"
+                : "flex min-h-0 flex-1 flex-col overflow-hidden px-5 py-4 md:px-6"
           }
         >
           {children}

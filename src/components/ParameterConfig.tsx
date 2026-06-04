@@ -18,27 +18,52 @@ export function ParameterConfig({ params, onChange, className }: Props) {
     <Section
       title="参数配置"
       subtitle="初始资金与定存触发策略"
+      compact
       className={className}
     >
-      <div className="grid gap-5">
-        <MoneyInput
-          id="initialInvestment"
-          label="初始理财本金"
-          valueYuan={params.initialInvestment}
-          onChangeYuan={(v) => onChange({ initialInvestment: v })}
-        />
-        <MoneyInput
-          id="initialLiquid"
-          label="初始活期留存"
-          valueYuan={params.initialLiquid}
-          onChangeYuan={(v) => onChange({ initialLiquid: v })}
-        />
-        <MoneyInput
-          id="fixedDepositTrigger"
-          label="定存触发器金额"
-          valueYuan={params.fixedDepositTrigger}
-          onChangeYuan={(v) => onChange({ fixedDepositTrigger: v })}
-        />
+      <div className="grid gap-3">
+        <div className="grid grid-cols-2 gap-3">
+          <MoneyInput
+            id="initialInvestment"
+            label="初始理财本金"
+            valueYuan={params.initialInvestment}
+            onChangeYuan={(v) => onChange({ initialInvestment: v })}
+            compact
+          />
+          <MoneyInput
+            id="initialLiquid"
+            label="初始活期留存"
+            valueYuan={params.initialLiquid}
+            onChangeYuan={(v) => onChange({ initialLiquid: v })}
+            compact
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <MoneyInput
+            id="fixedDepositTrigger"
+            label="定存触发器金额"
+            valueYuan={params.fixedDepositTrigger}
+            onChangeYuan={(v) => onChange({ fixedDepositTrigger: v })}
+            compact
+          />
+          <div>
+            <Label htmlFor="granularity">趋势粒度</Label>
+            <Select
+              id="granularity"
+              compact
+              value={params.projectionGranularity}
+              onChange={(v) =>
+                onChange({
+                  projectionGranularity: v as AppParams["projectionGranularity"],
+                })
+              }
+              options={[
+                { value: "monthly", label: "月度" },
+                { value: "quarterly", label: "季度" },
+              ]}
+            />
+          </div>
+        </div>
         <div>
           <div className="flex items-center justify-between gap-3">
             <Label htmlFor="projectionYears" className="mb-0">
@@ -60,22 +85,6 @@ export function ParameterConfig({ params, onChange, className }: Props) {
             <span>1 年</span>
             <span>10 年</span>
           </div>
-        </div>
-        <div>
-          <Label htmlFor="granularity">趋势粒度</Label>
-          <Select
-            id="granularity"
-            value={params.projectionGranularity}
-            onChange={(v) =>
-              onChange({
-                projectionGranularity: v as AppParams["projectionGranularity"],
-              })
-            }
-            options={[
-              { value: "monthly", label: "月度" },
-              { value: "quarterly", label: "季度" },
-            ]}
-          />
         </div>
       </div>
     </Section>

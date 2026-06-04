@@ -14,6 +14,7 @@ function parseFrequency(raw: unknown): Frequency {
     biweekly: "biweekly",
     monthly: "monthly",
     quarterly: "quarterly",
+    semiannual: "semiannual",
     yearly: "yearly",
     once: "monthly",
   };
@@ -103,6 +104,7 @@ export function normalizeEvent(raw: unknown): FinancialEvent | null {
       method:
         e.method === "equal_principal" ? "equal_principal" : "equal_installment",
       excludeFromExpense: Boolean(e.excludeFromExpense),
+      expenseSource: e.expenseSource === "investment" ? "investment" : "liquid",
     };
   }
 

@@ -35,12 +35,14 @@ interface Props {
   snapshots: PeriodSnapshot[];
   selectedIndex: number;
   onSelectSnapshot: (index: number) => void;
+  className?: string;
 }
 
 export function TrendChart({
   snapshots,
   selectedIndex,
   onSelectSnapshot,
+  className,
 }: Props) {
   const { formatChartValue } = useSettings();
   const labels = snapshots.map((s) => s.label);
@@ -57,14 +59,14 @@ export function TrendChart({
       labels,
       datasets: [
         {
-          label: "理财资产",
-          data: snapshots.map((s) => s.investmentAssets),
+          label: "总资产",
+          data: snapshots.map((s) => s.investmentAssets + s.liquid),
           borderColor: "#3d9eff",
           backgroundColor: "rgba(61, 158, 255, 0.08)",
           fill: true,
           tension: 0.35,
           pointRadius,
-          pointHoverRadius: 0,
+          pointHoverRadius: 4,
           pointHitRadius: 12,
           pointBackgroundColor: "#3d9eff",
           pointBorderColor: "#121820",
@@ -77,23 +79,9 @@ export function TrendChart({
           backgroundColor: "transparent",
           tension: 0.35,
           pointRadius,
-          pointHoverRadius: 0,
+          pointHoverRadius: 4,
           pointHitRadius: 12,
           pointBackgroundColor: "#ef4444",
-          pointBorderColor: "#121820",
-          pointBorderWidth: 2,
-        },
-        {
-          label: "累计净资产",
-          data: snapshots.map((s) => s.netWorth),
-          borderColor: "#22c55e",
-          backgroundColor: "rgba(34, 197, 94, 0.06)",
-          fill: true,
-          tension: 0.35,
-          pointRadius,
-          pointHoverRadius: 0,
-          pointHitRadius: 12,
-          pointBackgroundColor: "#22c55e",
           pointBorderColor: "#121820",
           pointBorderWidth: 2,
         },
@@ -126,7 +114,32 @@ export function TrendChart({
           labels: { color: "#8b9cb3", boxWidth: 12, padding: 16 },
         },
         tooltip: {
-          enabled: false,
+          enabled: true,
+          backgroundColor: "#121820",
+          borderColor: "#1e2a38",
+          borderWidth: 1,
+          titleColor: "#8b9cb3",
+          bodyColor: "#e2e8f0",
+          padding: 12,
+          displayColors: true,
+          boxWidth: 10,
+          boxHeight: 10,
+          callbacks: {
+            label: (context) => {
+              const label = context.dataset.label ?? "";
+              const value = formatChartValue(context.parsed.y ?? 0);
+              return `${label}: ${value}`;
+            },
+            afterLabel: (context) => {
+              if (context.datasetIndex !== 0) return [];
+              const snapshot = snapshots[context.dataIndex];
+              if (!snapshot) return [];
+              return [
+                `  理财本金: ${formatChartValue(snapshot.investmentAssets)}`,
+                `  活期留存: ${formatChartValue(snapshot.liquid)}`,
+              ];
+            },
+          },
         },
       },
       scales: {
@@ -143,19 +156,23 @@ export function TrendChart({
         },
       },
     }),
-    [formatChartValue, onSelectSnapshot]
+    [formatChartValue, onSelectSnapshot, snapshots]
   );
 
   return (
     <Section
       title="趋势图表"
-      subtitle="点击图表上的时点，更新上方视觉看板"
+      subtitle="悬停查看数值，点击图表上的时点更新上方视觉看板"
+      fill
+      className={className}
     >
-      <div className="h-72 md:h-96 w-full cursor-pointer">
+      <div className="min-h-0 w-full flex-1 cursor-pointer lg:flex lg:flex-col">
         {snapshots.length > 1 ? (
-          <Line data={data} options={options} />
+          <div className="h-72 min-h-0 flex-1 lg:h-full">
+            <Line data={data} options={options} />
+          </div>
         ) : (
-          <p className="flex h-full cursor-default items-center justify-center text-sm text-[var(--color-muted)]">
+          <p className="flex h-72 items-center justify-center text-sm text-[var(--color-muted)] lg:h-full lg:min-h-[12rem]">
             请配置参数与事件以生成预测曲线
           </p>
         )}

@@ -58,6 +58,10 @@ export function matchesFrequency(
       const months = monthsBetween(parseDate(anchorIso), parseDate(targetIso));
       return months >= 0 && months % 3 === 0 && target.d === anchor.d;
     }
+    case "semiannual": {
+      const months = monthsBetween(parseDate(anchorIso), parseDate(targetIso));
+      return months >= 0 && months % 6 === 0 && target.d === anchor.d;
+    }
     case "yearly": {
       const months = monthsBetween(parseDate(anchorIso), parseDate(targetIso));
       return months >= 0 && months % 12 === 0 && target.d === anchor.d;

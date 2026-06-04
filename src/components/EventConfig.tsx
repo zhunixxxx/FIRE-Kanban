@@ -37,6 +37,7 @@ const freqOptions: { value: Frequency; label: string }[] = [
   { value: "biweekly", label: "每半月" },
   { value: "monthly", label: "每月" },
   { value: "quarterly", label: "每季度" },
+  { value: "semiannual", label: "每半年" },
   { value: "yearly", label: "每年" },
 ];
 
@@ -44,6 +45,7 @@ const loanRepaymentCycleOptions: { value: Frequency; label: string }[] = [
   { value: "monthly", label: "每月" },
   { value: "biweekly", label: "每半月" },
   { value: "quarterly", label: "每季度" },
+  { value: "semiannual", label: "每半年" },
   { value: "yearly", label: "每年" },
 ];
 
@@ -121,6 +123,7 @@ function loadFormFromEvent(ev: FinancialEvent) {
       annualRate: String(ev.annualRate),
       method: ev.method,
       excludeFromExpense: ev.excludeFromExpense,
+      expenseSource: ev.expenseSource,
     };
   }
   if (ev.category === "transfer") {
@@ -207,6 +210,7 @@ export function EventConfig({
         annualRate: num(form.annualRate),
         method: form.method,
         excludeFromExpense: form.excludeFromExpense,
+        expenseSource: form.expenseSource,
       };
     } else if (form.category === "transfer") {
       ev = {
@@ -251,7 +255,9 @@ export function EventConfig({
   };
 
   const showExpenseAccount =
-    form.category === "expense" || form.category === "transfer";
+    form.category === "expense" ||
+    form.category === "transfer" ||
+    form.category === "loan";
   const isLoan = form.category === "loan";
   const amountLabel = isLoan ? "贷款本金" : "金额";
 
