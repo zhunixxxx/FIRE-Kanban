@@ -205,7 +205,9 @@ export function EventConfig({
         firstDate.iso,
         lastDate?.iso ?? null,
         form.frequency,
-        form.isLongTerm
+        form.isLongTerm,
+        12,
+        firstDate.anchor
       );
       ev = {
         ...base,
@@ -278,7 +280,9 @@ export function EventConfig({
       form.firstDate.iso,
       last?.iso ?? null,
       form.frequency,
-      form.isLongTerm
+      form.isLongTerm,
+      12,
+      form.firstDate.anchor
     );
   }, [
     isLoan,

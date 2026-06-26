@@ -91,7 +91,8 @@ export function normalizeEvent(raw: unknown): FinancialEvent | null {
       lastDate?.iso ?? null,
       frequency,
       isLongTerm,
-      Math.max(1, Math.round(Number(e.periods) || 0) || 12)
+      Math.max(1, Math.round(Number(e.periods) || 0) || 12),
+      firstDate.anchor
     );
     return {
       ...base,

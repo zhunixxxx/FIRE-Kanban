@@ -50,7 +50,8 @@ export function nextOccurrenceIso(
       cursor,
       ev.frequency,
       lastIso,
-      ev.isLongTerm
+      ev.isLongTerm,
+      ev.firstDate.anchor
     );
     for (const iso of dates) {
       if (compareIsoDate(iso, fromIso) >= 0) return iso;
@@ -69,7 +70,8 @@ export function nextOccurrenceAmount(ev: FinancialEvent, nextIso: string): numbe
     nextIso,
     loan.frequency,
     lastIso,
-    loan.isLongTerm
+    loan.isLongTerm,
+    loan.firstDate.anchor
   );
   if (payIndex < 1 || payIndex > loan.periods) return ev.amount;
   const schedule = buildLoanSchedule(

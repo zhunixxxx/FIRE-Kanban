@@ -1,5 +1,18 @@
-import type { Frequency } from "../types";
+import type { DateAnchor, Frequency } from "../types";
 import { compareIsoDate, daysInMonth, parseIsoDate, toIsoDate } from "./date";
+
+function dayMatchesAnchor(
+  targetIso: string,
+  anchorIso: string,
+  anchor: DateAnchor
+): boolean {
+  const target = parseIsoDate(targetIso);
+  if (anchor === "month_start") return target.d === 1;
+  if (anchor === "month_end") {
+    return target.d === daysInMonth(target.y, target.m);
+  }
+  return target.d === parseIsoDate(anchorIso).d;
+}
 
 function parseDate(iso: string): Date {
   const [y, m, d] = iso.split("-").map(Number);
@@ -37,13 +50,11 @@ function daysBetween(anchorIso: string, targetIso: string): number {
 export function matchesFrequency(
   anchorIso: string,
   targetIso: string,
-  frequency: Frequency
+  frequency: Frequency,
+  anchor: DateAnchor = "exact"
 ): boolean {
   const diffDays = daysBetween(anchorIso, targetIso);
   if (diffDays < 0) return false;
-
-  const anchor = parseIsoDate(anchorIso);
-  const target = parseIsoDate(targetIso);
 
   switch (frequency) {
     case "once":
@@ -55,18 +66,30 @@ export function matchesFrequency(
     case "biweekly":
       return diffDays % 14 === 0;
     case "monthly":
-      return target.d === anchor.d;
+      return dayMatchesAnchor(targetIso, anchorIso, anchor);
     case "quarterly": {
       const months = monthsBetween(parseDate(anchorIso), parseDate(targetIso));
-      return months >= 0 && months % 3 === 0 && target.d === anchor.d;
+      return (
+        months >= 0 &&
+        months % 3 === 0 &&
+        dayMatchesAnchor(targetIso, anchorIso, anchor)
+      );
     }
     case "semiannual": {
       const months = monthsBetween(parseDate(anchorIso), parseDate(targetIso));
-      return months >= 0 && months % 6 === 0 && target.d === anchor.d;
+      return (
+        months >= 0 &&
+        months % 6 === 0 &&
+        dayMatchesAnchor(targetIso, anchorIso, anchor)
+      );
     }
     case "yearly": {
       const months = monthsBetween(parseDate(anchorIso), parseDate(targetIso));
-      return months >= 0 && months % 12 === 0 && target.d === anchor.d;
+      return (
+        months >= 0 &&
+        months % 12 === 0 &&
+        dayMatchesAnchor(targetIso, anchorIso, anchor)
+      );
     }
   }
 }
@@ -76,7 +99,8 @@ export function occurrenceDatesInMonth(
   simMonth: Date,
   frequency: Frequency,
   lastIso: string | null,
-  isLongTerm: boolean
+  isLongTerm: boolean,
+  firstAnchor: DateAnchor = "exact"
 ): string[] {
   const y = simMonth.getFullYear();
   const m = simMonth.getMonth() + 1;
@@ -85,7 +109,7 @@ export function occurrenceDatesInMonth(
   for (let d = 1; d <= dim; d++) {
     const iso = toIsoDate(y, m, d);
     if (!dateInRange(iso, firstIso, lastIso, isLongTerm)) continue;
-    if (matchesFrequency(firstIso, iso, frequency)) out.push(iso);
+    if (matchesFrequency(firstIso, iso, frequency, firstAnchor)) out.push(iso);
   }
   return out;
 }
@@ -95,7 +119,8 @@ export function countOccurrencesBetween(
   firstIso: string,
   lastIso: string | null,
   frequency: Frequency,
-  isLongTerm: boolean
+  isLongTerm: boolean,
+  firstAnchor: DateAnchor = "exact"
 ): number {
   if (frequency === "once") {
     if (compareIsoDate(lastIso ?? firstIso, firstIso) < 0) return 0;
@@ -116,7 +141,8 @@ export function countOccurrencesBetween(
       cursor,
       frequency,
       lastIso,
-      false
+      false,
+      firstAnchor
     ).length;
     cursor.setMonth(cursor.getMonth() + 1);
   }
@@ -130,7 +156,8 @@ export function countOccurrencesThrough(
   throughIso: string,
   frequency: Frequency,
   lastIso: string | null,
-  isLongTerm: boolean
+  isLongTerm: boolean,
+  firstAnchor: DateAnchor = "exact"
 ): number {
   if (compareIsoDate(throughIso, firstIso) < 0) return 0;
 
@@ -146,7 +173,8 @@ export function countOccurrencesThrough(
       cursor,
       frequency,
       lastIso,
-      isLongTerm
+      isLongTerm,
+      firstAnchor
     )) {
       if (compareIsoDate(iso, throughIso) <= 0) count++;
     }

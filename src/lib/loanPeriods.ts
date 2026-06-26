@@ -1,4 +1,4 @@
-import type { Frequency } from "../types";
+import type { DateAnchor, Frequency } from "../types";
 import { countOccurrencesBetween } from "./recurrence";
 
 const LONG_TERM_DEFAULT_PERIODS = 360;
@@ -9,10 +9,17 @@ export function loanPeriodsFromRepaymentSchedule(
   lastIso: string | null,
   frequency: Frequency,
   isLongTerm: boolean,
-  fallback = 12
+  fallback = 12,
+  firstAnchor: DateAnchor = "exact"
 ): number {
   if (isLongTerm || !lastIso) {
     return Math.max(1, fallback === 12 ? LONG_TERM_DEFAULT_PERIODS : fallback);
   }
-  return countOccurrencesBetween(firstIso, lastIso, frequency, false);
+  return countOccurrencesBetween(
+    firstIso,
+    lastIso,
+    frequency,
+    false,
+    firstAnchor
+  );
 }

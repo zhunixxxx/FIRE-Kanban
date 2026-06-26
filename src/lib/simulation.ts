@@ -89,7 +89,8 @@ function loanPaymentForMonth(
     simMonth,
     loan.frequency,
     lastIso,
-    loan.isLongTerm
+    loan.isLongTerm,
+    loan.firstDate.anchor
   );
   if (dates.length === 0) return null;
 
@@ -101,7 +102,8 @@ function loanPaymentForMonth(
     payDate,
     loan.frequency,
     lastIso,
-    loan.isLongTerm
+    loan.isLongTerm,
+    loan.firstDate.anchor
   );
   if (payIndex < 1 || payIndex > loan.periods) return null;
 
@@ -126,7 +128,8 @@ function remainingLoanBalance(loans: LoanEvent[], simMonth: Date): number {
       throughIso,
       loan.frequency,
       lastIso,
-      loan.isLongTerm
+      loan.isLongTerm,
+      loan.firstDate.anchor
     );
 
     if (completed === 0) {
@@ -231,7 +234,8 @@ export function runSimulation(
         simMonth,
         ev.frequency,
         lastIso,
-        ev.isLongTerm
+        ev.isLongTerm,
+        ev.firstDate.anchor
       );
       for (const date of dates) {
         pending.push({
@@ -362,7 +366,8 @@ function estimateNextMonthExpense(
       next,
       ev.frequency,
       lastIso,
-      ev.isLongTerm
+      ev.isLongTerm,
+      ev.firstDate.anchor
     );
     if (dates.length === 0) continue;
     expense += ev.amount * dates.length;
